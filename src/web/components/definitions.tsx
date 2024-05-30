@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { scrollTo } from '../utils/scrollTo';
 import Editor from './editor';
 import { HighlightInline } from './highlight';
-import { Signature, SignatureDefinition, SignatureDefinitionArg } from 'meta-utils';
+import { Signature, SignatureDefinition, SignatureDefinitionArg, isSignatureFunctionDefinition } from 'meta-utils';
 import { getSiteDescription, greyscriptMeta } from 'greyscript-meta';
 
 export interface DefinitionsProps {
@@ -166,14 +166,16 @@ function Definition({
   const description = greyscriptMeta.getDescription(type, methodName);
   const example = greyscriptMeta.getExample(type, methodName);
   const key = `${type.toUpperCase()}_${methodName.toUpperCase()}`;
+  const args = isSignatureFunctionDefinition(definition) ? definition.arguments : [];
+  const returnValue = isSignatureFunctionDefinition(definition) ? definition.returns : [];
 
   return (
     <article className="definition" ref={containerRef}>
       <h3 id={key}>
         <span className="name">{methodName}</span>
         <span className="signature">
-          ({renderArguments(definition.arguments)}):{' '}
-          {renderReturn(definition.returns)}
+          ({renderArguments(args)}):{' '}
+          {renderReturn(returnValue)}
         </span>
       </h3>
       <a

@@ -9,7 +9,8 @@ export const GreyScriptLanguage = {
     /\b(aptClient|computer|crypto|file|ftpShell|metaLib|metaMail|metaxploit|netSession|port|router|shell|blockchain|service|subWallet|wallet|coin|ctfEvent)\b/,
   method: [
     {
-      pattern: /\.(get_description|get_template|player_success|get_creator_name|get_mail_content)\b/
+      pattern:
+        /\.(get_description|get_template|player_success|get_creator_name|get_mail_content)\b/
     },
     {
       pattern:
