@@ -78,7 +78,7 @@
     "greyhack"
   ],
   "dependencies": {
-    "greyscript-meta": "~2.4.2",
+    "greyscript-meta": "~3.0.0",
     "react-in-viewport": "^1.0.0-alpha.30"
   }
 }

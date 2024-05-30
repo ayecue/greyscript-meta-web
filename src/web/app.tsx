@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { greyscriptMeta, getSiteDescription } from 'greyscript-meta/dist/meta';
+import { greyscriptMeta, getSiteDescription } from 'greyscript-meta';
 import ContentTable from './components/content-table';
 import Definitions from './components/definitions';
 import { AppExternalLink, ExternalLinks } from './components/external-links';
