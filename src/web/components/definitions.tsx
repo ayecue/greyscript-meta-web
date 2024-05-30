@@ -5,7 +5,7 @@ import { scrollTo } from '../utils/scrollTo';
 import Editor from './editor';
 import { HighlightInline } from './highlight';
 import { Signature, SignatureDefinition, SignatureDefinitionArg } from 'meta-utils';
-import { getSiteDescription, greyscriptMeta } from '../../meta';
+import { getSiteDescription, greyscriptMeta } from 'greyscript-meta/dist/meta';
 
 export interface DefinitionsProps {
   signatures: Signature[];
