@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { scrollTo } from '../utils/scrollTo';
 import Editor from './editor';
 import { HighlightInline } from './highlight';
-import { Signature, SignatureDefinition, SignatureDefinitionArg, isSignatureFunctionDefinition } from 'meta-utils';
+import { Signature, SignatureDefinition, SignatureDefinitionFunction, SignatureDefinitionFunctionArg, SignatureDefinitionBaseType } from 'meta-utils';
 import { getSiteDescription, greyscriptMeta } from 'greyscript-meta';
 
 export interface DefinitionsProps {
@@ -14,36 +14,58 @@ export interface DefinitionsProps {
   onCopyClick: (type: string, methodName: string) => void;
 }
 
-function renderArgumentLabel(arg: SignatureDefinitionArg) {
+function renderArgumentLabel(arg: SignatureDefinitionFunctionArg) {
   return (
     <span className="label">
-      {arg.label}
-      {arg.opt ? '?' : ''}
+      {arg.getLabel()}
+      {arg.isOptional() ? '?' : ''}
     </span>
   );
 }
 
-function renderArgumentDefault(arg: SignatureDefinitionArg) {
-  if (arg.default === undefined) return;
+function renderArgumentDefault(arg: SignatureDefinitionFunctionArg) {
+  const defaultDef = arg.getDefault();
+
+  if (defaultDef === null) return;
+
+  const argDefaultType = defaultDef.type;
+  const argDefaultValue = defaultDef.type === SignatureDefinitionBaseType.String ? `"${defaultDef.value}"` : defaultDef.value;
 
   return (
     <span className="default">
       {' '}
-      = <span className={arg.type}>{arg.default}</span>
+      = <span className={argDefaultType}>{argDefaultValue}</span>
     </span>
   );
 }
 
-function renderArguments(args: SignatureDefinitionArg[] = []) {
+function renderArguments(args: SignatureDefinitionFunctionArg[] = []) {
   if (args.length === 0) return;
 
   return (
     <div className="args">
-      {args.map((item: SignatureDefinitionArg, index: number) => {
+      {args.map((item: SignatureDefinitionFunctionArg, index: number) => {
+        const argTypes = item.getTypes().map((item) => item.toString());
+
         return (
-          <span key={index}>
+          <span key={index} className="arg">
             {renderArgumentLabel(item)}:{' '}
-            <span className="type">{item.type}</span>
+            {argTypes.map((typeItem: string, index: number) => {
+              return (
+                <span key={index}>
+                  <span className="type">
+                    {typeItem}
+                  </span>
+                  {index < argTypes.length - 1 ? (
+                    <span className="or">
+                      {getSiteDescription('DEFINITIONS_OR')}
+                    </span>
+                  ) : (
+                    ''
+                  )}
+                </span>
+              );
+            })}
             {renderArgumentDefault(item)}
             {index < args.length - 1 ? ', ' : ''}
           </span>
@@ -58,12 +80,10 @@ function renderReturn(returns: string[]) {
     <div className="returns">
       <p>
         {returns.map((item: string, index: number) => {
-          const [type, subType] = item.split(':');
-
           return (
             <span key={index}>
               <span className="type">
-                {subType ? `${type}<${subType}>` : type}
+                {item}
               </span>
               {index < returns.length - 1 ? (
                 <span className="or">
@@ -163,11 +183,11 @@ function Definition({
   onCopyClick
 }: DefinitionProps) {
   const containerRef = useRef<HTMLElement>(null);
-  const description = greyscriptMeta.getDescription(type, methodName);
-  const example = greyscriptMeta.getExample(type, methodName);
+  const description = definition.getDescription();
+  const example = definition.getExample();
   const key = `${type.toUpperCase()}_${methodName.toUpperCase()}`;
-  const args = isSignatureFunctionDefinition(definition) ? definition.arguments : [];
-  const returnValue = isSignatureFunctionDefinition(definition) ? definition.returns : [];
+  const args = definition.getType().type === SignatureDefinitionBaseType.Function ? (definition as SignatureDefinitionFunction).getArguments() : [];
+  const returnTypes = definition.getType().type === SignatureDefinitionBaseType.Function ? (definition as SignatureDefinitionFunction).getReturns().map((item) => item.toString()) : [];
 
   return (
     <article className="definition" ref={containerRef}>
@@ -175,7 +195,7 @@ function Definition({
         <span className="name">{methodName}</span>
         <span className="signature">
           ({renderArguments(args)}):{' '}
-          {renderReturn(returnValue)}
+          {renderReturn(returnTypes)}
         </span>
       </h3>
       <a
@@ -206,10 +226,11 @@ function renderDefinitions({
   const items = signatures.map((item, index) => {
     let visibleItems = 0;
     const containerRef = useRef<HTMLLIElement>(null);
-    const intrinsicKeys = Object.keys(item.definitions).sort();
+    const definitions = item.getDefinitions();
+    const intrinsicKeys = Object.keys(definitions).sort();
     const items = intrinsicKeys.map((methodName: string, subIndex: number) => {
-      const definition = item.definitions[methodName];
-      const isHidden = pattern && !pattern.test(`${item.type}.${methodName}`);
+      const definition = item.getDefinition(methodName);
+      const isHidden = pattern && !pattern.test(`${item.getType()}.${methodName}`);
 
       if (!isHidden) {
         visibleItems++;
@@ -218,7 +239,7 @@ function renderDefinitions({
       return (
         <li key={subIndex} className={isHidden ? 'hidden' : ''}>
           <Definition
-            type={item.type}
+            type={item.getType()}
             methodName={methodName}
             definition={definition}
             onCodeRunClick={onCodeRunClick}
@@ -227,9 +248,10 @@ function renderDefinitions({
         </li>
       );
     });
-    const metaDescription = greyscriptMeta.getDescription(item.type, '$meta');
-    const metaExample = greyscriptMeta.getExample(item.type, '$meta');
-    const isHidden = pattern && !pattern.test(`${item.type}`);
+    const $meta = item.getDescriptions()['$meta'];
+    const metaDescription = $meta.description;
+    const metaExample = $meta.example;
+    const isHidden = pattern && !pattern.test(`${item.getType()}`);
 
     if (!isHidden) {
       visibleItems++;
@@ -241,12 +263,12 @@ function renderDefinitions({
         key={index}
         ref={containerRef}
       >
-        <h2 id={item.type.toUpperCase()}>{item.type}</h2>
+        <h2 id={item.getType().toUpperCase()}>{item.getType()}</h2>
         {metaDescription ? renderDescription(metaDescription) : null}
         {metaExample ? (
           <Editor
             content={metaExample.join('\n')}
-            name={item.type.toUpperCase()}
+            name={item.getType().toUpperCase()}
             onClick={onCodeRunClick}
           />
         ) : null}

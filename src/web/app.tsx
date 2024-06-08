@@ -26,8 +26,8 @@ export default function ({
   const rootRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState(filterInit);
   const signatures = greyscriptMeta.getAllSignatures()
-    .filter((it) => it.type !== 'any')
-    .sort((a, b) => a.type.localeCompare(b.type));
+    .filter((it) => it.getType() !== 'any')
+    .sort((a, b) => a.getType().localeCompare(b.getType()));
 
   useEffect(() => {
     if (rootRef !== null) {

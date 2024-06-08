@@ -14,15 +14,15 @@ function renderSignatures({ signatures, filter, onClick }: ContentTableProps) {
     <ul className="first">
       {signatures.sort().map((item, index) => {
         const pattern = new RegExp(filter, 'i');
-        let intrinsics = Object.keys(item.definitions).sort();
+        let intrinsics = Object.keys(item.getDefinitions()).sort();
 
         if (filter !== '') {
           intrinsics = intrinsics.filter((methodName) => {
-            return pattern.test(`${item.type}.${methodName}`);
+            return pattern.test(`${item.getType()}.${methodName}`);
           });
         }
 
-        if (!pattern.test(`${item.type}`) && intrinsics.length === 0) {
+        if (!pattern.test(`${item.getType()}`) && intrinsics.length === 0) {
           return;
         }
 
@@ -31,21 +31,21 @@ function renderSignatures({ signatures, filter, onClick }: ContentTableProps) {
             <a
               onClick={(ev) => {
                 ev.preventDefault();
-                scrollTo(item.type.toUpperCase());
+                scrollTo(item.getType().toUpperCase());
                 window.history.pushState(
                   null,
                   null,
-                  `#${item.type.toUpperCase()}`
+                  `#${item.getType().toUpperCase()}`
                 );
-                onClick(item.type);
+                onClick(item.getType());
               }}
               rel="nofollow"
             >
-              {item.type}
+              {item.getType()}
             </a>
             <ul className="second">
               {intrinsics.map((methodName: string, subIndex: number) => {
-                const key = `${item.type.toUpperCase()}_${methodName.toUpperCase()}`;
+                const key = `${item.getType().toUpperCase()}_${methodName.toUpperCase()}`;
                 return (
                   <li key={subIndex}>
                     <a
@@ -53,7 +53,7 @@ function renderSignatures({ signatures, filter, onClick }: ContentTableProps) {
                         ev.preventDefault();
                         scrollTo(key);
                         window.history.pushState(null, null, `#${key}`);
-                        onClick(`${item.type}.${methodName}`);
+                        onClick(`${item.getType()}.${methodName}`);
                       }}
                       rel="nofollow"
                     >
