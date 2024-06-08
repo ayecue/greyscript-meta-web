@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useDebounce } from 'use-debounce';
 
 import { greyscriptMeta, getSiteDescription } from 'greyscript-meta';
 import ContentTable from './components/content-table';
@@ -24,7 +25,8 @@ export default function ({
   onCopyClick = () => { }
 }: AppProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [filter, setFilter] = useState(filterInit);
+  const [filterInput, setFilterInput] = useState(filterInit);
+  const [filter] = useDebounce(filterInput, 750);
   const signatures = greyscriptMeta.getAllSignatures()
     .filter((it) => it.getType() !== 'any')
     .sort((a, b) => a.getType().localeCompare(b.getType()));
@@ -41,14 +43,14 @@ export default function ({
         <div className="search">
           <input
             type="text"
-            onChange={(ev) => setFilter(ev.target.value)}
-            value={filter}
+            onChange={(ev) => setFilterInput(ev.target.value)}
+            value={filterInput}
             aria-label="Search"
           />
-          {filter.length > 0 ? (
+          {filterInput.length > 0 ? (
             <span
               className="clear material-icons"
-              onClick={() => setFilter('')}
+              onClick={() => setFilterInput('')}
             ></span>
           ) : null}
         </div>
