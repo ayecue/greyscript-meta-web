@@ -435,6 +435,44 @@ html {
   color: #569cd6;
 }
 
+.definitions .definition .variations .info {
+  font-size: 15px;
+  bottom: 2px;
+  position: relative;
+  color: #ce9178;
+  cursor: pointer;
+}
+
+.definitions .definition .variations .info:before {
+  content: "\e88e";
+}
+
+.definitions .definition .variations:hover .variations-wrapper {
+  display: block;
+}
+
+.definitions .definition .variations .variations-wrapper {
+  display: none;
+  position: absolute;
+  background: #1e1e1e;
+  opacity: 0.95;
+  border: 1px solid #FFF;
+  padding: 5px;
+  z-index: 999;
+}
+
+.definitions .definition .variations .variation {
+  display: block;
+}
+
+.definitions .definition .variations .variation.string {
+  color: #ce9178 !important;
+}
+
+.definitions .definition .variations .variation.number {
+  color: #b5cea8 !important;
+}
+
 .definitions .definition .description {
   font-size: 14px;
   margin: 10px 0 0;

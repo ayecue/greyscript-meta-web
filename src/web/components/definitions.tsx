@@ -4,8 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import { scrollTo } from '../utils/scrollTo';
 import Editor from './editor';
 import { HighlightInline } from './highlight';
-import { Signature, SignatureDefinition, SignatureDefinitionFunction, SignatureDefinitionFunctionArg, SignatureDefinitionBaseType } from 'meta-utils';
-import { getSiteDescription, greyscriptMeta } from 'greyscript-meta';
+import { Signature, SignatureDefinition, SignatureDefinitionFunction, SignatureDefinitionFunctionArg, SignatureDefinitionBaseType, Variation } from 'meta-utils';
+import { getSiteDescription } from 'greyscript-meta';
 
 export interface DefinitionsProps {
   signatures: Signature[];
@@ -138,6 +138,24 @@ function renderDescription(description: string) {
   );
 }
 
+function renderReturnVariations(variations: Variation[]) {
+  if (variations.length === 0) {
+    return null;
+  }
+
+  return <span className="variations">
+    <a className="info material-icons" title="Variation of static return values" rel="nofollow"></a>
+    <span className="variations-wrapper">
+      {variations.map((variation, index) => {
+        if (typeof variation === 'string') {
+          return <span className="variation string" key={index}>"{variation}"</span>;
+        }
+        return <span className="variation number" key={index}>{variation}</span>;
+      })}
+    </span>
+  </span>;
+}
+
 interface DefinitionBodyProps {
   description: string;
   example: string[];
@@ -186,8 +204,17 @@ function Definition({
   const description = definition.getDescription();
   const example = definition.getExample();
   const key = `${type.toUpperCase()}_${methodName.toUpperCase()}`;
-  const args = definition.getType().type === SignatureDefinitionBaseType.Function ? (definition as SignatureDefinitionFunction).getArguments() : [];
-  const returnTypes = definition.getType().type === SignatureDefinitionBaseType.Function ? (definition as SignatureDefinitionFunction).getReturns().map((item) => item.toString()) : [];
+  let args: SignatureDefinitionFunctionArg[] = [];
+  let returnTypes: string[] = [];
+  let returnVariations: Variation[] = [];
+
+  if (definition.getType().type === SignatureDefinitionBaseType.Function) {
+    const fnDef = definition as SignatureDefinitionFunction;
+
+    args = fnDef.getArguments();
+    returnTypes = fnDef.getReturns().map((item) => item.toString());
+    returnVariations = fnDef.getReturnVariations();
+  }
 
   return (
     <article className="definition" ref={containerRef}>
@@ -197,6 +224,7 @@ function Definition({
           ({renderArguments(args)}):{' '}
           {renderReturn(returnTypes)}
         </span>
+        {renderReturnVariations(returnVariations)}
       </h3>
       <a
         className="share"
