@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
+import GitHubButton from 'react-github-btn';
 
 import { greyscriptMeta, getSiteDescription } from 'greyscript-meta';
 import ContentTable from './components/content-table';
@@ -62,13 +63,18 @@ export default function ({
       </div>
       <div className="content-wrapper">
         <div className="readme">
-          <h1>{getSiteDescription('WELCOME_TITLE')}</h1>
-          <article
-            dangerouslySetInnerHTML={{
-              __html: getSiteDescription('WELCOME_TEXT')
-            }}
-          ></article>
-          <ExternalLinks externalLinks={externalLinks} />
+          <div className="intro">
+            <h1>{getSiteDescription('WELCOME_TITLE')}</h1>
+            <article
+              dangerouslySetInnerHTML={{
+                __html: getSiteDescription('WELCOME_TEXT')
+              }}
+            ></article>
+          </div>
+          <div className="github-button">
+            <GitHubButton href="https://github.com/ayecue/greyscript-meta" data-color-scheme="no-preference: dark; light: light; dark: dark;" data-icon="octicon-star" data-size="large" aria-label="Star ayecue/greyscript-meta on GitHub">Star</GitHubButton>
+          </div>
+          <ExternalLinks className='external-links-wrapper' externalLinks={externalLinks} />
         </div>
         <Definitions
           signatures={signatures}
@@ -77,6 +83,6 @@ export default function ({
           onCopyClick={onCopyClick}
         />
       </div>
-    </div>
+    </div >
   );
 }
