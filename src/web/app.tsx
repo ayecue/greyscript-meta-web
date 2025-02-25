@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useDebounce } from 'use-debounce';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import GitHubButton from 'react-github-btn';
 
 import { greyscriptMeta, getSiteDescription } from 'greyscript-meta';
@@ -25,12 +25,19 @@ export default function ({
   onCodeRunClick = () => { },
   onCopyClick = () => { }
 }: AppProps) {
+  const inputRef = useRef(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const [filterInput, setFilterInput] = useState(filterInit);
-  const [filter] = useDebounce(filterInput, 750);
-  const signatures = greyscriptMeta.getAllSignatures()
+  const debouncedFilter = useDebouncedCallback(
+    (value) => {
+      setFilterInput(value);
+    },
+    100
+  );
+  const getSignatures = useCallback(() => greyscriptMeta.getAllSignatures()
     .filter((it) => it.getType() !== 'any')
-    .sort((a, b) => a.getType().localeCompare(b.getType()));
+    .sort((a, b) => a.getType().localeCompare(b.getType())), []);
+  const signatures = getSignatures();
 
   useEffect(() => {
     if (rootRef !== null) {
@@ -43,21 +50,24 @@ export default function ({
       <div className="navigation">
         <div className="search">
           <input
+            ref={inputRef}
             type="text"
-            onChange={(ev) => setFilterInput(ev.target.value)}
-            value={filterInput}
+            onChange={(ev) => debouncedFilter(ev.target.value)}
             aria-label="Search"
           />
           {filterInput.length > 0 ? (
             <span
               className="clear material-icons"
-              onClick={() => setFilterInput('')}
+              onClick={(e) => {
+                inputRef.current.value = '';
+                debouncedFilter('')
+              }}
             ></span>
           ) : null}
         </div>
         <ContentTable
           signatures={signatures}
-          filter={filter}
+          filter={filterInput}
           onClick={onSidebarClick}
         />
       </div>
@@ -78,7 +88,7 @@ export default function ({
         </div>
         <Definitions
           signatures={signatures}
-          filter={filter}
+          filter={filterInput}
           onCodeRunClick={onCodeRunClick}
           onCopyClick={onCopyClick}
         />

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import { scrollTo } from '../utils/scrollTo';
@@ -266,13 +266,13 @@ function renderDefinitions({
 
       return (
         <li key={subIndex} className={isHidden ? 'hidden' : ''}>
-          <Definition
+          {useMemo(() => <Definition
             type={item.getType()}
             methodName={methodName}
             definition={definition}
             onCodeRunClick={onCodeRunClick}
             onCopyClick={onCopyClick}
-          />
+          />, [])}
         </li>
       );
     });

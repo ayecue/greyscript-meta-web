@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { scrollTo } from '../utils/scrollTo';
 import { Signature } from 'meta-utils';
 
@@ -10,9 +10,11 @@ export interface ContentTableProps {
 }
 
 function renderSignatures({ signatures, filter, onClick }: ContentTableProps) {
+  const getSortedSignatures = useCallback(() => signatures.sort(), []);
+
   return (
     <ul className="first">
-      {signatures.sort().map((item, index) => {
+      {getSortedSignatures().map((item, index) => {
         const pattern = new RegExp(filter, 'i');
         let intrinsics = Object.keys(item.getDefinitions()).sort();
 

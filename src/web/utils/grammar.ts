@@ -108,7 +108,8 @@ export const GreyScriptLanguage = {
     },
     {
       // trafficNet
-      pattern: /\.(camera_link_system|locate_vehicle|next_camera|prev_camera|traffic_light_config)\b/
+      pattern:
+        /\.(camera_link_system|locate_vehicle|next_camera|prev_camera|traffic_light_config)\b/
     },
     {
       // smartAppliance
