@@ -292,14 +292,14 @@ function renderDefinitions({
         ref={containerRef}
       >
         <h2 id={item.getType().toUpperCase()}>{item.getType()}</h2>
-        {metaDescription ? renderDescription(metaDescription) : null}
-        {metaExample ? (
+        {metaDescription ? useMemo(() => renderDescription(metaDescription), []) : null}
+        {metaExample ? useMemo(() =>
           <Editor
             content={metaExample.join('\n')}
             name={item.getType().toUpperCase()}
             onClick={onCodeRunClick}
           />
-        ) : null}
+          , []) : null}
         {items.length > 0 ? <ul className="second">{items}</ul> : null}
       </li>
     );
