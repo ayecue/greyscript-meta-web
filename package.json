@@ -1,6 +1,6 @@
 {
   "name": "greyscript-meta-web",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "Website for GreyScript API",
   "main": "dist/index",
   "typings": "dist/index",
