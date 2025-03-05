@@ -58,6 +58,7 @@ export default function ({
         <div className="search">
           <input
             className="search-input"
+            defaultValue={filterInit}
             ref={inputRef}
             type="text"
             onChange={(ev) => debouncedFilter(ev.target.value)}
