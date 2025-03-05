@@ -7,26 +7,32 @@ import ContentTable from './components/content-table';
 import Definitions from './components/definitions';
 import { AppExternalLink, ExternalLinks } from './components/external-links';
 import { scrollTo } from './utils/scrollTo';
+import TagsInput from './components/tags-input';
 
 export interface AppProps {
+  defaultTags: string[];
   externalLinks: AppExternalLink[];
   filterInit: string;
   scrollToInit: string;
   onSidebarClick?: Function;
+  onTagsChange?: (tags: string[]) => void;
   onCodeRunClick?: (content: string, name: string) => void;
   onCopyClick?: (type: string, methodName: string) => void;
 }
 
 export default function ({
+  defaultTags,
   filterInit,
   scrollToInit,
   externalLinks,
   onSidebarClick = () => { },
+  onTagsChange = () => { },
   onCodeRunClick = () => { },
   onCopyClick = () => { }
 }: AppProps) {
   const inputRef = useRef(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const [tags, setTags] = useState<string[]>(defaultTags);
   const [filterInput, setFilterInput] = useState(filterInit);
   const debouncedFilter = useDebouncedCallback(
     (value) => {
@@ -34,6 +40,7 @@ export default function ({
     },
     100
   );
+  const getAvailableTags = useCallback(() => greyscriptMeta.getAvailableTags(), []);
   const getSignatures = useCallback(() => greyscriptMeta.getAllSignatures()
     .filter((it) => it.getType() !== 'any')
     .sort((a, b) => a.getType().localeCompare(b.getType())), []);
@@ -50,6 +57,8 @@ export default function ({
       <div className="navigation">
         <div className="search">
           <input
+            className="search-input"
+            defaultValue={filterInit}
             ref={inputRef}
             type="text"
             onChange={(ev) => debouncedFilter(ev.target.value)}
@@ -64,8 +73,17 @@ export default function ({
               }}
             ></span>
           ) : null}
+          <TagsInput
+            availableTags={getAvailableTags()}
+            activeTags={defaultTags}
+            onChange={(excludedTags) => {
+              setTags(excludedTags);
+              onTagsChange(excludedTags);
+            }}
+          />
         </div>
         <ContentTable
+          excludedTags={tags}
           signatures={signatures}
           filter={filterInput}
           onClick={onSidebarClick}
@@ -87,6 +105,7 @@ export default function ({
           <ExternalLinks className='external-links-wrapper' externalLinks={externalLinks} />
         </div>
         <Definitions
+          excludedTags={tags}
           signatures={signatures}
           filter={filterInput}
           onCodeRunClick={onCodeRunClick}

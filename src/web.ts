@@ -3,6 +3,14 @@ import { createRoot } from 'react-dom/client';
 
 import App from './web/app';
 
+function getDefaultTags() {
+  return localStorage.getItem('defaultTags')?.split(',') ?? ['detached'];
+}
+
+function handleTagsChange(tags: string[]) {
+  localStorage.setItem('defaultTags', tags.join(','));
+}
+
 function getFilterValue() {
   const urlSearchParams = new URLSearchParams(location.search);
   return urlSearchParams.get('filter') || '';
@@ -22,6 +30,7 @@ function shareLink(type: string, methodName: string) {
 const root = createRoot(document.querySelector('#root'));
 root.render(
   React.createElement(App, {
+    defaultTags: getDefaultTags(),
     externalLinks: [
       {
         label: 'Greybel CLI',
@@ -50,6 +59,7 @@ root.render(
     ],
     filterInit: getFilterValue(),
     scrollToInit: getScrollToValue(),
-    onCopyClick: shareLink
+    onCopyClick: shareLink,
+    onTagsChange: handleTagsChange
   })
 );
