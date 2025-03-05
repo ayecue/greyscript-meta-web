@@ -3,20 +3,28 @@ import { scrollTo } from '../utils/scrollTo';
 import { Signature } from 'meta-utils';
 
 export interface ContentTableProps {
+  excludedTags: string[];
   signatures: Signature[];
   filter: string;
   onClick: Function;
   hidden?: boolean;
 }
 
-function renderSignatures({ signatures, filter, onClick }: ContentTableProps) {
+function renderSignatures({ excludedTags, signatures, filter, onClick }: ContentTableProps) {
   const getSortedSignatures = useCallback(() => signatures.sort(), []);
 
   return (
     <ul className="first">
       {getSortedSignatures().map((item, index) => {
         const pattern = new RegExp(filter, 'i');
-        let intrinsics = Object.keys(item.getDefinitions()).sort();
+        const getIntrinsicsKeys = useCallback(() => Object.entries(item.getDefinitions())
+          .filter(([_key, item]) => {
+            return !item.getTags().some((tag) => excludedTags.includes(tag));
+          })
+          .map(([key]) => key)
+          .sort()
+          , [excludedTags]);
+        let intrinsics = getIntrinsicsKeys();
 
         if (filter !== '') {
           intrinsics = intrinsics.filter((methodName) => {

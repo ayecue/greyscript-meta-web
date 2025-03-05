@@ -8,6 +8,7 @@ import { Signature, SignatureDefinition, SignatureDefinitionFunction, SignatureD
 import { getSiteDescription } from 'greyscript-meta';
 
 export interface DefinitionsProps {
+  excludedTags: string[];
   signatures: Signature[];
   filter: string;
   onCodeRunClick: (content: string, name: string) => void;
@@ -245,6 +246,7 @@ function Definition({
 }
 
 function renderDefinitions({
+  excludedTags,
   signatures,
   filter,
   onCodeRunClick,
@@ -258,7 +260,7 @@ function renderDefinitions({
     const intrinsicKeys = Object.keys(definitions).sort();
     const items = intrinsicKeys.map((methodName: string, subIndex: number) => {
       const definition = item.getDefinition(methodName);
-      const isHidden = pattern && !pattern.test(`${item.getType()}.${methodName}`);
+      const isHidden = (pattern && !pattern.test(`${item.getType()}.${methodName}`)) || excludedTags.some((tag) => definition.getTags().includes(tag));
 
       if (!isHidden) {
         visibleItems++;
